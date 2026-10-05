@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: market-db
+    environment:
+      POSTGRES_DB: market
+      POSTGRES_USER: market
+      POSTGRES_PASSWORD: market123
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U market -d market"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    container_name: market-backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/market
+      DB_USER: market
+      DB_PASSWORD: market123
+      JWT_SECRET: rural-market-platform-jwt-secret-key-please-change-in-production-0123456789abcdef
+      UPLOAD_DIR: /app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: market-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  pgdata:
+  uploads:
