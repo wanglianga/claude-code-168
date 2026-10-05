@@ -1,0 +1,37 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: market-fair-platform
+  datasource:
+    url: ${JDBC_URL:jdbc:postgresql://localhost:5432/market_fair}
+    username: ${JDBC_USER:market}
+    password: ${JDBC_PASSWORD:market}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          time_zone: Asia/Shanghai
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 30MB
+
+app:
+  upload:
+    dir: ${UPLOAD_DIR:./data/uploads}
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}
+
+logging:
+  level:
+    com.ruralmarket: INFO

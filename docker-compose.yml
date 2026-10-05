@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: market-fair-db
+    environment:
+      POSTGRES_DB: market_fair
+      POSTGRES_USER: market
+      POSTGRES_PASSWORD: market
+      TZ: Asia/Shanghai
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U market -d market_fair"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: market-fair-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      JDBC_URL: jdbc:postgresql://db:5432/market_fair
+      JDBC_USER: market
+      JDBC_PASSWORD: market
+      UPLOAD_DIR: /app/data/uploads
+      PUBLIC_BASE_URL: ""
+      TZ: Asia/Shanghai
+    volumes:
+      - uploads:/app/data/uploads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: market-fair-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:
